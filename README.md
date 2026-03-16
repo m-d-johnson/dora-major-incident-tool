@@ -15,7 +15,6 @@ This tool implements a flowchart-based decision process to determine if an incid
 - Decision history tracking
 - Copy decision log to clipboard
 - Clear visual feedback
-- Mobile-responsive design
 
 ## How to Use
 
@@ -31,9 +30,8 @@ The tool includes several decision paths:
 
 1. **Direct Not Major**: When the incident doesn't affect critical services
 2. **Major Security Incident**: When there's a malicious intrusion
-3. **Major Operational Incident (via Data Impact)**: When there's significant data impact
-4. **Major Operational Incident (via Questions)**: When 2 or more criteria are met
-5. **Not Major (via Questions)**: When fewer than 2 criteria are met
+3. **Major Operational Incident**: When 2 or more operational criteria are met
+4. **Not Major**: When fewer than 2 operational criteria are met
 
 ## Technical Details
 

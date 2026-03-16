@@ -14,10 +14,17 @@ let port = 8080;
 
 // Create server
 const server = http.createServer((req, res) => {
-  // Get the file path
+  // Get the file path and prevent path traversal
   let filePath = "." + req.url;
   if (filePath === "./") {
     filePath = "./index.html";
+  }
+  filePath = path.normalize(filePath);
+  const resolved = path.resolve(filePath);
+  if (!resolved.startsWith(path.resolve("."))) {
+    res.writeHead(403);
+    res.end("Forbidden");
+    return;
   }
 
   // Get the file extension
@@ -48,14 +55,14 @@ const server = http.createServer((req, res) => {
     if (error) {
       if (error.code === "ENOENT") {
         // File not found
-        fs.readFile("./404.html", (error, content) => {
+        fs.readFile("./404.html", (err404, content404) => {
           res.writeHead(404, { "Content-Type": "text/html" });
-          res.end(content, "utf-8");
+          res.end(content404 || "<h1>404 - Not Found</h1>", "utf-8");
         });
       } else {
         // Server error
         res.writeHead(500);
-        res.end(`Server Error: ${error.code}`);
+        res.end("Internal Server Error");
       }
     } else {
       // Success
