@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="DORA Major Incident Classification Helper - A tool to assess if an incident qualifies as a major incident under DORA">
-    <title>DORA Major Incident Classification Helper</title>
+    <title>Prima DORA Major Incident Classification Helper</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -16,20 +16,17 @@
         .flowchart-container {
             background-color: white;
             border-radius: 8px;
-            padding: 20px;
+            padding: 24px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        /* Base node styles */
         .node {
-            background-color: #4CAF50;
             color: white;
-            padding: 15px;
-            border-radius: 5px;
+            padding: 20px;
+            border-radius: 8px;
             margin: 10px 0;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .node:hover {
-            background-color: #45a049;
+            line-height: 1.6;
+            max-width: 100%;
         }
         .node-content {
             white-space: pre-line;
@@ -42,28 +39,74 @@
             color: #fff;
             text-decoration: underline;
         }
+        /* Node type colors */
+        .node-gate {
+            background-color: #1565C0;
+        }
+        .node-threshold {
+            background-color: #2E7D32;
+        }
+        .node-outcome-major {
+            background-color: #C62828;
+        }
+        .node-outcome-not-major {
+            background-color: #546E7A;
+        }
+        /* Progress indicator */
+        .progress-bar {
+            display: none;
+            margin: 12px 0 0 0;
+        }
+        .progress-bar.visible {
+            display: block;
+        }
+        .progress-track {
+            background-color: rgba(255,255,255,0.25);
+            border-radius: 4px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background-color: rgba(255,255,255,0.85);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        .progress-label {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+        /* Answer buttons */
         .options {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             margin-top: 20px;
         }
         button {
-            padding: 10px 20px;
+            padding: 14px 32px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             background-color: #2196F3;
             color: white;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.2s;
+            font-size: 1em;
+            font-weight: 600;
+            min-width: 100px;
         }
         button:hover {
             background-color: #1976D2;
         }
+        button:active {
+            background-color: #1565C0;
+        }
+        /* History */
         .history {
-            margin-top: 20px;
-            padding: 10px;
+            margin-top: 24px;
+            padding: 16px;
             background-color: #f8f8f8;
-            border-radius: 5px;
+            border-radius: 8px;
         }
         .history-header {
             display: flex;
@@ -71,10 +114,40 @@
             align-items: center;
             margin-bottom: 10px;
         }
+        #history-list {
+            padding-left: 0;
+            list-style: none;
+        }
+        #history-list li {
+            padding: 6px 0;
+            border-bottom: 1px solid #e8e8e8;
+            font-size: 0.9em;
+            color: #444;
+        }
+        #history-list li:last-child {
+            border-bottom: none;
+        }
+        .history-label {
+            font-weight: 600;
+            color: #222;
+        }
+        .history-answer-yes {
+            color: #2E7D32;
+            font-weight: 600;
+        }
+        .history-answer-no {
+            color: #C62828;
+            font-weight: 600;
+        }
+        .history-timestamp {
+            color: #999;
+            font-size: 0.85em;
+        }
         .copy-button {
             background-color: #4CAF50;
-            padding: 5px 10px;
-            font-size: 0.9em;
+            padding: 8px 14px;
+            font-size: 0.85em;
+            min-width: auto;
         }
         .copy-button:hover {
             background-color: #45a049;
@@ -101,8 +174,12 @@
 <body>
     <div class="flowchart-container" role="main">
         <h1>DORA Major Incident Classification Helper</h1>
-        <div id="current-node" class="node" role="region" aria-label="Current Question">
+        <div id="current-node" class="node node-gate" role="region" aria-label="Current Question">
             <div id="node-content" class="node-content" aria-live="polite">Start: What would you like to do?</div>
+            <div id="progress-bar" class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
+                <div class="progress-label" id="progress-label"></div>
+                <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+            </div>
         </div>
         <div class="options" id="options" role="group" aria-label="Answer Options">
             <!-- Options will be populated by JavaScript -->

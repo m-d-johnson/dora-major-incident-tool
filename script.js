@@ -10,64 +10,64 @@
 
 // Define the flowchart structure for DORA major incident assessment
 const flowchart = {
-  // Initial question to determine if the incident affects critical services
+  // Article 6: Criticality of services affected
   start: {
+    type: "gate",
+    label: "Critical services (Article 6)",
     text:
-      "Does the incident affect critical services supporting critical functions?\n\n" +
-      "Consult the Software Catalog to identify whether the service is in Tier 1 or Tier 2.",
+      "Does the incident affect critical services under Article 6?\n\n" +
+      "Answer Yes if ANY of the following apply:\n\n" +
+      "a) The incident affects ICT services or network and information systems that support critical or important functions " +
+      "(consult the Software Catalog to identify whether the service is in Tier 1 or Tier 2)\n" +
+      "b) The incident affects financial services provided by the entity that require authorisation, registration, or are supervised by competent authorities\n" +
+      "c) The incident constitutes a successful, malicious and unauthorised access to the network and information systems",
     options: [
       { text: "Yes", next: "maliciousIntrusion" },
       { text: "No", next: "notMajor" },
     ],
   },
-  // Question about data impact
-  dataImpact: {
-    text:
-      "Has there been, or will there be, an impact on the availability, authenticity, integrity or\n" +
-      "confidentiality of data which could have an adverse impact on the implementation of our\n" +
-      "business objectives or our ability to meet regulatory requirements?",
-    options: [
-      { text: "Yes", next: "majorOperationalIncident" },
-      { text: "No", next: "maliciousIntrusion" },
-    ],
-  },
-  // Question about malicious intrusion
+  // Article 9(5)(b): Standalone major trigger — successful malicious access with data loss risk
   maliciousIntrusion: {
+    type: "gate",
+    label: "Malicious access with data loss risk (Article 9(5)(b))",
     text:
-      "Has there been, or will there be, an impact on the availability, authenticity, integrity or\n" +
-      "confidentiality of data which could have an adverse impact on the implementation of our\n" +
-      "business objectives or our ability to meet regulatory requirements?\n\n or \n\n" +
-      "Has there been a malicious and successful intrusion likely to place data at risk?\n\n" +
-      "Consider:\n" +
-      "• Unauthorized access to systems\n" +
-      "• Data breaches\n" +
-      "• Ransomware attacks\n" +
-      "• Other security incidents",
+      "Has there been a successful, malicious and unauthorised access to the network and information systems that may result in data losses?\n\n" +
+      "Consider whether:\n" +
+      "• There has been unauthorised access to systems containing sensitive data\n" +
+      "• A data breach has occurred or is likely\n" +
+      "• Ransomware has been deployed that could compromise data availability or integrity\n\n" +
+      "Note: Under Article 8(1)(a) and Article 9(5)(b), this alone classifies the incident as major.",
     options: [
       { text: "Yes", next: "majorSecurityIncident" },
       { text: "No", next: "clientsFinancialCounterpartsTransactions" },
     ],
   },
-  // Article 1: Impact on clients, financial counterparts, and transactions
+  // Article 9(1): Impact on clients, financial counterparts, and transactions
   clientsFinancialCounterpartsTransactions: {
+    type: "threshold",
+    label: "Clients, counterparts & transactions (Article 9(1))",
+    thresholdNumber: 1,
     text:
-      "Question 1: Clients, Financial Counterparts and Transactions?\n\n" +
+      "Threshold 1 — Clients, Financial Counterparts and Transactions (Article 9(1))?\n\n" +
       "Has the incident affected any of the following:\n\n" +
       "a) >10% of all clients using the affected service\n" +
-      "b) >100 000 clients using the affected service\n" +
-      "c) >30% of all financial counterparts used by the FE\n" +
+      "b) >100,000 clients using the affected service\n" +
+      "c) >30% of all financial counterparts used by the financial entity\n" +
       "d) >10% of the daily average number of transactions\n" +
       "e) >10% of the daily average amount of transactions\n" +
-      "f) any identified impact on clients or financial counterpart identified by the FE as relevant",
+      "f) any impact on clients or financial counterparts identified by the financial entity as relevant",
     options: [
       { text: "Yes", next: "reputationalImpact", count: true },
       { text: "No", next: "reputationalImpact", count: false },
     ],
   },
-  // Article 2: Reputational impact
+  // Article 9(2): Reputational impact
   reputationalImpact: {
+    type: "threshold",
+    label: "Reputational impact (Article 9(2))",
+    thresholdNumber: 2,
     text:
-      "Question 2: Reputational Impact?\n" +
+      "Threshold 2 — Reputational Impact (Article 9(2))?\n" +
       "There has been a reputational impact if one or more of the following criteria are met:\n\n" +
       "• The incident has been reflected in the media\n" +
       "• We will not be able to, or will be unlikely to be able to, meet regulatory requirements as a result of the incident\n" +
@@ -78,32 +78,48 @@ const flowchart = {
       { text: "No", next: "durationServiceDowntime", count: false },
     ],
   },
-  // Question 3: Duration and service downtime
+  // Article 9(3): Duration and service downtime
   durationServiceDowntime: {
+    type: "threshold",
+    label: "Duration & downtime (Article 9(3))",
+    thresholdNumber: 3,
     text:
-      "Question 3: Duration and Service Downtime?\n\n" +
-      "Is the service downtime more than two hours, \n or \n" +
-      "Is the incident duration longer than 24 hours\n",
+      "Threshold 3 — Duration and Service Downtime (Article 9(3))?\n\n" +
+      "Has the incident met either of the following:\n\n" +
+      "a) The incident duration is longer than 24 hours\n" +
+      "b) The service downtime is more than 2 hours for ICT services that support critical or important functions",
     options: [
       { text: "Yes", next: "geographicScope", count: true },
       { text: "No", next: "geographicScope", count: false },
     ],
   },
-  // Question 4: Geographic scope
+  // Article 9(4): Geographical spread
   geographicScope: {
+    type: "threshold",
+    label: "Geographical spread (Article 9(4))",
+    thresholdNumber: 4,
     text:
-      "Question 4: Has the incident affected services in multiple EU member states?\n\n" +
-      "The United Kingdom should not be considered a member state:\n",
+      "Threshold 4 — Geographical Spread (Article 9(4))?\n\n" +
+      "Has the incident had an impact in 2 or more EU member states?\n\n" +
+      "Consider whether any of the following apply:\n" +
+      "a) Cross-border clients and counterparts in other member states are affected\n" +
+      "b) Branches or other financial entities within the group in other member states are affected\n" +
+      "c) Financial market infrastructures or third-party providers serving other member states are affected\n\n" +
+      "Note: The United Kingdom should not be considered a member state.",
     options: [
       { text: "Yes", next: "economicImpact", count: true },
       { text: "No", next: "economicImpact", count: false },
     ],
   },
-  // Question 5: Economic impact
+  // Article 9(6): Economic impact
   economicImpact: {
+    type: "threshold",
+    label: "Economic impact (Article 9(6))",
+    thresholdNumber: 5,
     text:
-      "Question 5: Has the incident caused significant economic impact or financial losses?\n\n" +
-      "We will have met this criterion if the incident has EUR 100 000 or more of financial impact across the following categories:\n" +
+      "Threshold 5 — Economic Impact (Article 9(6))?\n\n" +
+      "Have the costs and losses caused by the incident exceeded or are they likely to exceed EUR 100,000?\n\n" +
+      "Include the following categories:\n" +
       "a) expropriated funds or financial assets liability, including theft;\n" +
       "b) replacement or relocation costs;\n" +
       "c) staff costs;\n" +
@@ -113,47 +129,68 @@ const flowchart = {
       "g) communication costs;\n" +
       "h) advisory costs (based on available data at the time of reporting)",
     options: [
+      { text: "Yes", next: "dataLosses", count: true },
+      { text: "No", next: "dataLosses", count: false },
+    ],
+  },
+  // Article 9(5)(a): Data losses
+  dataLosses: {
+    type: "threshold",
+    label: "Data losses (Article 9(5)(a))",
+    thresholdNumber: 6,
+    text:
+      "Threshold 6 — Data Losses (Article 9(5)(a))?\n\n" +
+      "Has the incident caused a loss of data that has or will have an adverse impact on the financial entity's business objectives or its ability to meet regulatory requirements?\n\n" +
+      "Consider data losses in terms of:\n\n" +
+      "a) Availability: data rendered temporarily or permanently inaccessible or unusable\n" +
+      "b) Authenticity: the trustworthiness of the source of data has been compromised\n" +
+      "c) Integrity: non-authorised modification of data rendering it inaccurate or incomplete\n" +
+      "d) Confidentiality: data accessed by or disclosed to an unauthorised party or system",
+    options: [
       { text: "Yes", next: "evaluateOutcome", count: true },
       { text: "No", next: "evaluateOutcome", count: false },
     ],
   },
-  // Evaluation node to determine the outcome
-  evaluateOutcome: {
-    text: "Evaluating your answers...",
-    options: [{ text: "Continue", next: "start" }],
-  },
-  // Outcome: Major security incident
+  // Outcome: Major security incident — triggered by Article 8(1)(a) via Article 9(5)(b)
   majorSecurityIncident: {
+    type: "outcome-major",
+    label: "MAJOR INCIDENT (malicious access)",
     text:
-      "This is a MAJOR SECURITY INCIDENT under DORA. You must:\n" +
+      "This is a MAJOR INCIDENT under DORA (Article 8(1)(a) — successful malicious unauthorised access with data loss risk).\n\n" +
+      "You must:\n" +
       "1. Activate the Security Incident Response Plan Playbook NOW\n" +
       "2. Mark the incident as a security incident in the incident management tool\n" +
       "3. Mark the incident as a DORA major incident in the incident management tool\n" +
       "4. Activate your major incident response plan\n" +
-      "5. Follow security incident response procedures\n\n" +
-      "For more information, see the <a href='https://www.eba.europa.eu' target='_blank'>Playbook</a>.",
+      "5. Follow security incident response procedures",
     options: [{ text: "Start New Assessment", next: "start" }],
   },
-  // Outcome: Major operational incident
+  // Outcome: Major operational incident — triggered by Article 8(1)(b), 2+ thresholds met
   majorOperationalIncident: {
+    type: "outcome-major",
+    label: "MAJOR INCIDENT (2+ thresholds)",
     text:
-      "This is a MAJOR OPERATIONAL INCIDENT under DORA. You must:\n" +
+      "This is a MAJOR INCIDENT under DORA (Article 8(1)(b) — 2 or more materiality thresholds met).\n\n" +
+      "You must:\n" +
       "1. Activate the Major Incident Response Plan Playbook NOW\n" +
-      "2. Mark the incident as a security incident in the incident management tool\n" +
-      "3. Submit a final notification within 72 hours\n" +
-      "4. Activate your major incident response plan\n" +
-      "5. Follow operational incident response procedures\n\n" +
-      "For more information, see the <a href='https://www.eba.europa.eu' target='_blank'>Playbook</a>.",
+      "2. Mark the incident as a DORA major incident in the incident management tool\n" +
+      "3. Activate your major incident response plan\n" +
+      "4. Follow operational incident response procedures",
     options: [{ text: "Start New Assessment", next: "start" }],
   },
   // Outcome: Not a major incident
   notMajor: {
+    type: "outcome-not-major",
+    label: "Not a major incident",
     text:
       "This is NOT a major incident under DORA. Continue with normal incident management procedures.\n\n" +
       "Remember to:\n" +
       "• Document the incident\n" +
       "• Implement appropriate remediation measures\n" +
-      "• Review and update incident response procedures if needed",
+      "• Review and update incident response procedures if needed\n\n" +
+      "<strong>Recurring Incidents (Article 8(2)):</strong> If this incident has the same apparent root cause as a previous incident that occurred within the last 6 months, " +
+      "and they collectively meet the major incident criteria, the incidents must be reclassified as major. " +
+      "This does not apply to microenterprises or entities listed in Article 16(1) of Regulation (EU) 2022/2554.",
     options: [{ text: "Start New Assessment", next: "start" }],
   },
 };
@@ -162,6 +199,9 @@ const flowchart = {
 let decisionHistory = [];
 let yesCount = 0;
 
+// Total number of threshold questions
+const TOTAL_THRESHOLDS = 6;
+
 // Get DOM elements for manipulation
 const currentNodeElement = document.getElementById("current-node");
 const nodeContentElement = document.getElementById("node-content");
@@ -169,6 +209,9 @@ const optionsElement = document.getElementById("options");
 const historyListElement = document.getElementById("history-list");
 const copyLogButton = document.getElementById("copy-log");
 const copyFeedbackElement = document.getElementById("copy-feedback");
+const progressBar = document.getElementById("progress-bar");
+const progressFill = document.getElementById("progress-fill");
+const progressLabel = document.getElementById("progress-label");
 
 // Initialize the flowchart at the start node
 let currentNode = "start";
@@ -201,6 +244,29 @@ function updateDisplay() {
 
   // Set the node content with HTML support
   nodeContentElement.innerHTML = node.text;
+
+  // Apply node type class
+  currentNodeElement.className = "node";
+  if (node.type === "gate") {
+    currentNodeElement.classList.add("node-gate");
+  } else if (node.type === "threshold") {
+    currentNodeElement.classList.add("node-threshold");
+  } else if (node.type === "outcome-major") {
+    currentNodeElement.classList.add("node-outcome-major");
+  } else if (node.type === "outcome-not-major") {
+    currentNodeElement.classList.add("node-outcome-not-major");
+  }
+
+  // Update progress bar for threshold questions
+  if (node.type === "threshold" && node.thresholdNumber) {
+    progressBar.classList.add("visible");
+    const pct = ((node.thresholdNumber - 1) / TOTAL_THRESHOLDS) * 100;
+    progressFill.style.width = pct + "%";
+    progressLabel.textContent = `Threshold ${node.thresholdNumber} of ${TOTAL_THRESHOLDS}`;
+    progressBar.setAttribute("aria-valuenow", node.thresholdNumber);
+  } else {
+    progressBar.classList.remove("visible");
+  }
 
   // Update ARIA attributes for accessibility
   currentNodeElement.setAttribute(
@@ -257,7 +323,10 @@ function makeDecision(option) {
     }
   }
 
-  // If we're at the evaluateOutcome node, determine if it's a major incident
+  // Move to next node
+  currentNode = option.next;
+
+  // If we've reached the end of the assessment, determine if it's a major incident
   if (currentNode === "evaluateOutcome") {
     if (yesCount >= 2) {
       currentNode = "majorOperationalIncident";
@@ -268,9 +337,6 @@ function makeDecision(option) {
     }
     // Reset the counter for the next assessment
     yesCount = 0;
-  } else {
-    // Move to next node
-    currentNode = option.next;
   }
 
   updateDisplay();
@@ -301,20 +367,28 @@ function announceToScreenReader(message) {
  */
 function updateHistory() {
   historyListElement.innerHTML = "";
-  decisionHistory.forEach((item, index) => {
+  decisionHistory.forEach((item) => {
     const li = document.createElement("li");
-    // Create a plain text version for the history
-    const plainText = flowchart[item.node].text.replace(/<[^>]*>/g, "");
-    li.textContent = `${index + 1}. [${item.timestamp}] ${plainText} → ${
-      item.decision
-    }`;
-    historyListElement.appendChild(li);
+    const node = flowchart[item.node];
+    const label = node.label || item.node;
 
-    // Add a line break after each decision for better readability
-    if (index < decisionHistory.length - 1) {
-      const br = document.createElement("br");
-      historyListElement.appendChild(br);
-    }
+    const labelSpan = document.createElement("span");
+    labelSpan.className = "history-label";
+    labelSpan.textContent = label;
+
+    const answerSpan = document.createElement("span");
+    answerSpan.className =
+      item.decision === "Yes" ? "history-answer-yes" : "history-answer-no";
+    answerSpan.textContent = " " + item.decision;
+
+    const timeSpan = document.createElement("span");
+    timeSpan.className = "history-timestamp";
+    timeSpan.textContent = " — " + item.timestamp;
+
+    li.appendChild(labelSpan);
+    li.appendChild(answerSpan);
+    li.appendChild(timeSpan);
+    historyListElement.appendChild(li);
   });
 
   // Update ARIA attributes for the history list
@@ -336,12 +410,11 @@ function copyDecisionLog() {
   let logText = "DORA Major Incident Assessment Log\n\n";
 
   decisionHistory.forEach((item, index) => {
-    // Create a plain text version for the log
-    const plainText = flowchart[item.node].text.replace(/<[^>]*>/g, "");
-    logText += `${index + 1}. [${item.timestamp}] ${plainText} → ${
-      item.decision
-    }\n\n`; // Added extra newline for spacing
+    const node = flowchart[item.node];
+    const label = node.label || item.node;
+    logText += `${index + 1}. [${item.timestamp}] ${label} → ${item.decision}\n`;
   });
+  logText += "\n";
 
   // Add the final outcome
   if (currentNode === "majorSecurityIncident") {
